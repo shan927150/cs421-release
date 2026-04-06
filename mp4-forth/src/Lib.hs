@@ -98,7 +98,9 @@ liftIntOp _  _        = Nothing
 --- ### `liftCompOp`
 
 liftCompOp :: (Integer -> Integer -> Bool) -> IStack -> Maybe IStack
-liftCompOp = undefined
+liftCompOp op (x:y:xs) = Just $ (if y `op` x then -1 else 0) : xs
+liftCompOp _  _        = Nothing
+
 
 
 --- The Dictionary
@@ -144,13 +146,16 @@ istackDup (i:is) = Just $ i:i:is
 istackDup _      = Nothing
 
 istackSwap :: IStack -> Maybe IStack
-istackSwap = undefined
+istackSwap (x:y:xs)= Just (y:x:xs)
+istackSwap _       = Nothing
 
 istackDrop :: IStack -> Maybe IStack
-istackDrop = undefined
+istackDrop (x:xs)= Just xs
+istackDrop _ = Nothing
 
 istackRot :: IStack -> Maybe IStack
-istackRot = undefined
+istackRot (x:y:z:xs)= Just (z:x:y:xs)
+istackRot _= Nothing
 
 --- ### Popping the Stack
 
@@ -162,7 +167,7 @@ printPop _ = underflow
 --- ### Printing the Stack
 
 printStack :: ForthState -> ForthState
-printStack (istack, dict, out) = undefined
+printStack (istack, dict, out) = (istack, dict, unwords(map show (reverse istack)) : out)
 
 --- Evaluator
 --- ---------
@@ -213,15 +218,24 @@ cstackNext _ = Nothing
 --- ### Conditionals
 
 cstackIf :: CStack -> Maybe CStack
-cstackIf cstack = undefined
+--like the for
+cstackIf cstack = Just $ ("for", id):cstack 
 
 cstackElse :: CStack -> Maybe CStack
-cstackElse cstack@(("if", _):_) = undefined
+cstackElse cstack@(("if", _):_) = Just (("else",id):cstack)
 cstackElse _ = Nothing
 
+branch::Transition->Transition->Transition
+branch kt kf (i:is,d,o)=
+    if i/=0 then kt (is,d,o)
+            else kf (is,d,o)
+branch _ _ _ =underflow
+
 cstackThen :: CStack -> Maybe CStack
-cstackThen (("else", kelse):("if", kif):(c, kold):cstack) = undefined
-cstackThen (("if", kif):(c, kold):cstack) = undefined
+cstackThen (("else", kelse):("if", kif):(c, kold):cstack) = 
+    Just ((c, knew):cstack) where knew= branch kif kelse . kold
+cstackThen (("if", kif):(c, kold):cstack) = 
+    Just ((c, knew):cstack) where knew= branch kif id . kold
 cstackThen _ = Nothing
 
 --- ### Indefinite Loops
@@ -229,8 +243,15 @@ cstackThen _ = Nothing
 cstackBegin :: CStack -> Maybe CStack
 cstackBegin cstack = Just $ ("begin", id):cstack
 
+transUntil::Transition->Transition
+transUntil kloop state = 
+    let (i:is,d,o)= kloop state
+    in if i/=0 then (is,d,o)
+            else transUntil kloop (is,d,o)
+
 cstackUntil :: CStack -> Maybe CStack
-cstackUntil (("begin", kloop):(c, kold):cstack) = undefined
+cstackUntil (("begin", kloop):(c, kold):cstack) = 
+    Just ((c, knew):cstack) where knew= transUntil kloop . kold
 cstackUntil _ = Nothing
 
 
