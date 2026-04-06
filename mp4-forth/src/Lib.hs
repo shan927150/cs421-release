@@ -127,18 +127,18 @@ initArith :: Dictionary
 initArith = [ ("+",  Prim $ liftIStackOp $ liftIntOp (+)),
               ("-",  Prim $ liftIStackOp $ liftIntOp (-)),
               ("*",  Prim $ liftIStackOp $ liftIntOp (*)),
-              ("/",  Prim $ liftIStackOp $ liftIntOp (/))
+              ("/",  Prim $ liftIStackOp $ liftIntOp div)
             ]
 
 --- ### Comparison Operators
 
 initComp :: Dictionary
-initComp = [("=",  Prim $ liftIStackOp $ liftIntOp (=)),
-            ("!=",  Prim $ liftIStackOp $ liftIntOp (!=)),
-            (">",  Prim $ liftIStackOp $ liftIntOp (>)),
-            ("<",  Prim $ liftIStackOp $ liftIntOp (<)),
-            (">=",  Prim $ liftIStackOp $ liftIntOp (>=)),
-            ("<=",  Prim $ liftIStackOp $ liftIntOp (<=))
+initComp = [("=",  Prim $ liftIStackOp $ liftCompOp (==)),
+            ("!=",  Prim $ liftIStackOp $ liftCompOp (/=)),
+            (">",  Prim $ liftIStackOp $ liftCompOp (>)),
+            ("<",  Prim $ liftIStackOp $ liftCompOp (<)),
+            (">=",  Prim $ liftIStackOp $ liftCompOp (>=)),
+            ("<=",  Prim $ liftIStackOp $ liftCompOp (<=))
            ]
 
 --- ### Stack Manipulations
