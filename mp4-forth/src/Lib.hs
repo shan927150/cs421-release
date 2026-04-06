@@ -124,21 +124,34 @@ initCompileOp = [ (":",    Define)
 --- ### Arithmetic Operators
 
 initArith :: Dictionary
-initArith = [ ("+",  Prim $ liftIStackOp $ liftIntOp (+))
+initArith = [ ("+",  Prim $ liftIStackOp $ liftIntOp (+)),
+              ("-",  Prim $ liftIStackOp $ liftIntOp (-)),
+              ("*",  Prim $ liftIStackOp $ liftIntOp (*)),
+              ("/",  Prim $ liftIStackOp $ liftIntOp (/))
             ]
 
 --- ### Comparison Operators
 
 initComp :: Dictionary
-initComp = []
+initComp = [("=",  Prim $ liftIStackOp $ liftIntOp (=)),
+            ("!=",  Prim $ liftIStackOp $ liftIntOp (!=)),
+            (">",  Prim $ liftIStackOp $ liftIntOp (>)),
+            ("<",  Prim $ liftIStackOp $ liftIntOp (<)),
+            (">=",  Prim $ liftIStackOp $ liftIntOp (>=)),
+            ("<=",  Prim $ liftIStackOp $ liftIntOp (<=))
+           ]
 
 --- ### Stack Manipulations
 
 initIStackOp :: Dictionary
-initIStackOp = [ ("dup",  Prim $ liftIStackOp istackDup)
+initIStackOp = [ ("dup",  Prim $ liftIStackOp istackDup),
+                 ("drop",  Prim $ liftIStackOp istackDrop),
+                 ("rot",  Prim $ liftIStackOp istackRot),
+                 ("swap",  Prim $ liftIStackOp istackSwap)
                ]
 
-initPrintOp = [ (".",  Prim printPop)
+initPrintOp = [ (".",  Prim printPop),
+                (".S",  Prim printStack)
               ]
 
 istackDup :: IStack -> Maybe IStack
@@ -219,7 +232,7 @@ cstackNext _ = Nothing
 
 cstackIf :: CStack -> Maybe CStack
 --like the for
-cstackIf cstack = Just $ ("for", id):cstack 
+cstackIf cstack = Just $ ("if", id):cstack 
 
 cstackElse :: CStack -> Maybe CStack
 cstackElse cstack@(("if", _):_) = Just (("else",id):cstack)
